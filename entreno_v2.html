@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Etiqueta para que la barra de estado del móvil se vea oscura -->
+    <meta name="theme-color" content="#000000">
+    <title>Mi Entreno</title>
+    <style>
+        :root {
+            /* Paleta Dark Mode Moderna */
+            --primary: #0A84FF; /* Azul estilo iOS Dark Mode */
+            --primary-glow: rgba(10, 132, 255, 0.4);
+            --bg-color: #000000;
+            --card-bg: #1C1C1E;
+            --card-border: #2C2C2E;
+            --input-bg: #2C2C2E;
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --danger: #FF453A;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent; /* Quita el parpadeo azul al tocar en móviles */
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 90px;
+        }
+
+        /* Navegación superior (Menús) con efecto cristal */
+        .tabs {
+            display: flex;
+            background-color: rgba(28, 28, 30, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 16px 0;
+            text-align: center;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+
+        #container {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Tarjeta de Ejercicio */
+        .exercise-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .exercise-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .exercise-title {
+            font-size: 20px;
+            font-weight: 700;
+            border: none;
+            background: transparent;
+            color: var(--text-main);
+            width: 85%;
+            outline: none;
+        }
+
+        .exercise-title::placeholder {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .delete-btn {
+            background: rgba(255, 69, 58, 0.1);
+            border: none;
+            color: var(--danger);
+            font-size: 16px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .set-headers {
+            display: flex;
+            margin-bottom: 10px;
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .set-headers span:nth-child(1) { width: 20%; text-align: center; }
+        .set-headers span:nth-child(2) { width: 30%; text-align: center; }
+        .set-headers span:nth-child(3) { width: 30%; text-align: center; }
+        .set-headers span:nth-child(4) { width: 20%; text-align: center; }
+
+        /* Filas de Set */
+        .set-row {
+            display: flex;
+            align-items: center;
+            background-color: var(--bg-color);
+            padding: 8px 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid var(--card-border);
+        }
+
+        .set-number {
+            width: 20%;
+            text-align: center;
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        .set-input-group {
+            width: 30%;
+            text-align: center;
+        }
+
+        .set-input {
+            width: 85%;
+            padding: 10px 4px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            background: var(--input-bg);
+            color: var(--text-main);
+            transition: border 0.2s;
+        }
+
+        .set-input:focus {
+            outline: none;
+            border: 1px solid var(--primary);
+        }
+
+        .set-delete {
+            width: 20%;
+            text-align: center;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        /* Botones de acción */
+        .add-set-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: rgba(10, 132, 255, 0.1);
+            border: none;
+            border-radius: 10px;
+            color: var(--primary);
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .add-set-btn:active {
+            background-color: rgba(10, 132, 255, 0.2);
+        }
+
+        .add-exercise-fab {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #2A9FFF 0%, #0066CC 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 700;
+            box-shadow: 0 8px 20px var(--primary-glow);
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            margin-top: 60px;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Menús (Pestañas) -->
+    <header class="tabs">
+        <button class="tab active" onclick="changeTab('empuje')" id="tab-empuje">Empuje</button>
+        <button class="tab" onclick="changeTab('traccion')" id="tab-traccion">Tracción</button>
+        <button class="tab" onclick="changeTab('piernas')" id="tab-piernas">Piernas</button>
+    </header>
+
+    <!-- Contenedor donde irán los Widgets -->
+    <main id="container">
+        <!-- Los ejercicios se generarán aquí mediante JavaScript -->
+    </main>
+
+    <!-- Botón para añadir nuevo ejercicio -->
+    <button class="add-exercise-fab" onclick="addExercise()">
+        <span style="font-size: 20px; line-height: 1;">+</span> Añadir Ejercicio
+    </button>
+
+    <script>
+        // --- 1. ESTADO DE LA APLICACIÓN ---
+        let currentTab = 'empuje';
+        let workouts = JSON.parse(localStorage.getItem('misEntrenos')) || {
+            empuje: [],
+            traccion: [],
+            piernas: []
+        };
+
+        // --- 2. FUNCIONES PRINCIPALES ---
+        function changeTab(tabName) {
+            currentTab = tabName;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            render();
+        }
+
+        function saveData() {
+            localStorage.setItem('misEntrenos', JSON.stringify(workouts));
+        }
+
+        // --- FUNCIONES DE EJERCICIOS (Widgets) ---
+        function addExercise() {
+            workouts[currentTab].push({
+                id: Date.now().toString(),
+                name: '',
+                sets: [{ reps: '', weight: '' }]
+            });
+            saveData();
+            render();
+        }
+
+        function updateExerciseName(id, newName) {
+            const ex = workouts[currentTab].find(e => e.id === id);
+            if (ex) {
+                ex.name = newName;
+                saveData();
+            }
+        }
+
+        function deleteExercise(id) {
+            if(confirm("¿Seguro que quieres eliminar este ejercicio?")) {
+                workouts[currentTab] = workouts[currentTab].filter(e => e.id !== id);
+                saveData();
+                render();
+            }
+        }
+
+        // --- FUNCIONES DE SETS (Mini-widgets) ---
+        function addSet(exerciseId) {
+            const ex = workouts[currentTab].find(e => e.id === exerciseId);
+            if (ex) {
+                ex.sets.push({ reps: '', weight: '' });
+                saveData();
+                render();
+            }
+        }
+
+        function updateSet(exerciseId, setIndex, field, value) {
+            const ex = workouts[currentTab].find(e => e.id === exerciseId);
+            if (ex && ex.sets[setIndex]) {
+                ex.sets[setIndex][field] = value;
+                saveData();
+            }
+        }
+
+        function deleteSet(exerciseId, setIndex) {
+            const ex = workouts[currentTab].find(e => e.id === exerciseId);
+            if (ex) {
+                ex.sets.splice(setIndex, 1);
+                saveData();
+                render();
+            }
+        }
+
+        // --- 3. MOTOR DE RENDERIZADO (Dibuja el HTML) ---
+        function render() {
+            const container = document.getElementById('container');
+            const currentExercises = workouts[currentTab];
+
+            if (currentExercises.length === 0) {
+                container.innerHTML = `<div class="empty-state">No hay ejercicios de ${currentTab}.<br>Pulsa el botón de abajo para empezar.</div>`;
+                return;
+            }
+
+            container.innerHTML = '';
+
+            currentExercises.forEach(ex => {
+                let exerciseHTML = `
+                    <div class="exercise-card">
+                        <div class="exercise-header">
+                            <input type="text" class="exercise-title" placeholder="Nombre (ej. Press Banca)" 
+                                   value="${ex.name}" onchange="updateExerciseName('${ex.id}', this.value)">
+                            <button class="delete-btn" onclick="deleteExercise('${ex.id}')">✕</button>
+                        </div>
+                        
+                        <div class="set-headers">
+                            <span>SET</span>
+                            <span>REPS</span>
+                            <span>KG</span>
+                            <span></span>
+                        </div>
+                `;
+
+                ex.sets.forEach((set, index) => {
+                    exerciseHTML += `
+                        <div class="set-row">
+                            <div class="set-number">${index + 1}</div>
+                            <div class="set-input-group">
+                                <input type="number" class="set-input" placeholder="-" value="${set.reps}" 
+                                       onchange="updateSet('${ex.id}', ${index}, 'reps', this.value)">
+                            </div>
+                            <div class="set-input-group">
+                                <input type="number" class="set-input" placeholder="-" value="${set.weight}" 
+                                       onchange="updateSet('${ex.id}', ${index}, 'weight', this.value)">
+                            </div>
+                            <button class="set-delete" onclick="deleteSet('${ex.id}', ${index})">✕</button>
+                        </div>
+                    `;
+                });
+
+                exerciseHTML += `
+                        <button class="add-set-btn" onclick="addSet('${ex.id}')">+ Añadir serie</button>
+                    </div>
+                `;
+
+                container.innerHTML += exerciseHTML;
+            });
+        }
+
+        render();
+    </script>
+</body>
+</html>
